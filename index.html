@@ -11,6 +11,16 @@
 
   <script>
     (function () {
+      var savedTheme = 'light';
+      try {
+        var storedTheme = localStorage.getItem('portfolioTheme');
+        if (storedTheme === 'dark' || storedTheme === 'light') savedTheme = storedTheme;
+      } catch (error) {}
+      document.documentElement.dataset.theme = savedTheme;
+      document.documentElement.style.colorScheme = savedTheme;
+      var themeMeta = document.querySelector('meta[name="theme-color"]');
+      if (themeMeta) themeMeta.setAttribute('content', savedTheme === 'dark' ? '#0b0b0b' : '#fbfaf7');
+
       var loaderSeen = false;
       try { loaderSeen = sessionStorage.getItem('portfolioLoaderSeen') === 'true'; } catch (error) {}
       document.documentElement.classList.add('js', loaderSeen ? 'preloader-revealed' : 'preloader-active');
@@ -188,6 +198,56 @@
     .nav-links .nav-cta:hover { color: var(--ink); background: var(--orange-2); }
     .menu-button { display: none; width: 44px; height: 44px; border: 0; border-radius: 50%; color: var(--ink); background: var(--orange); cursor: pointer; }
     .menu-button svg { width: 20px; height: 20px; }
+    .nav-controls { display: flex; align-items: center; gap: 8px; }
+    .theme-toggle { width: 44px; height: 44px; display: grid; place-items: center; flex: 0 0 44px; padding: 0; color: var(--white); border: 1px solid rgba(255,255,255,.16); border-radius: 50%; background: rgba(255,255,255,.07); cursor: pointer; transition: color .25s var(--ease), background .25s var(--ease), border-color .25s var(--ease), transform .25s var(--ease); }
+    .theme-toggle:hover { color: var(--ink); background: var(--orange); border-color: var(--orange); transform: rotate(8deg); }
+    .theme-toggle svg { width: 19px; height: 19px; }
+    .theme-toggle .sun-icon { display: none; }
+    html[data-theme="dark"] .theme-toggle .moon-icon { display: none; }
+    html[data-theme="dark"] .theme-toggle .sun-icon { display: block; }
+
+    /* Theme system: light is the default; dark preserves the original visual treatment. */
+    html[data-theme="light"] .hero {
+      color: var(--ink);
+      background:
+        linear-gradient(90deg, rgba(11,11,11,.035) 1px, transparent 1px),
+        linear-gradient(rgba(11,11,11,.035) 1px, transparent 1px),
+        var(--paper);
+      background-size: 52px 52px;
+    }
+    html[data-theme="light"] .availability { color: #4f4a45; border-color: var(--line-light); background: rgba(255,255,255,.82); }
+    html[data-theme="light"] .hero-copy { color: #514d48; }
+    html[data-theme="light"] .hero-meta { color: #68625c; }
+    html[data-theme="light"] .hero .button-ghost { color: var(--ink); border-color: var(--line-light); background: rgba(255,255,255,.82); }
+    html[data-theme="light"] .hero .button-ghost:hover { background: var(--cream); }
+    html[data-theme="light"] .portrait-card { border-color: rgba(11,11,11,.15); }
+    html[data-theme="light"] .section-dark { color: var(--ink); background: var(--paper); }
+    html[data-theme="light"] #experience { background: var(--cream); }
+    html[data-theme="light"] .section-dark .section-copy,
+    html[data-theme="light"] .work-heading p { color: var(--muted-dark); }
+    html[data-theme="light"] .project-card,
+    html[data-theme="light"] .timeline-item,
+    html[data-theme="light"] .proof-card { color: var(--white); }
+    html[data-theme="light"] .experience-timeline::before { background: rgba(11,11,11,.16); }
+    html[data-theme="dark"] body { color: #f4f2ed; background: var(--ink); }
+    html[data-theme="dark"] .section-cream { color: #f4f2ed; background: var(--ink-2); }
+    html[data-theme="dark"] .section-copy,
+    html[data-theme="dark"] .detail-row p,
+    html[data-theme="dark"] .tool-copy small { color: var(--muted); }
+    html[data-theme="dark"] .detail-row { border-color: var(--line-dark); }
+    html[data-theme="dark"] .skill-group-head::after { background: var(--line-dark); }
+    html[data-theme="dark"] .stack-code,
+    html[data-theme="dark"] .tool-card { color: #f4f2ed; border-color: var(--line-dark); background: var(--ink-3); box-shadow: 0 8px 22px rgba(0,0,0,.16); }
+    html[data-theme="dark"] .tool-icon { border-color: var(--line-dark); background: var(--ink-2); }
+    html[data-theme="dark"] .tool-card img[src*="github"],
+    html[data-theme="dark"] .tool-card img[src*="vercel"] { filter: invert(1); }
+    html[data-theme="dark"] .tool-card.is-concept .tool-icon img { filter: invert(49%) sepia(96%) saturate(2301%) hue-rotate(346deg) brightness(101%) contrast(102%); }
+    html[data-theme="dark"] #contact { background: var(--ink-2); }
+    html.theme-ready body,
+    html.theme-ready .hero,
+    html.theme-ready .section,
+    html.theme-ready .tool-card,
+    html.theme-ready .contact-shell { transition: color .35s var(--ease), background-color .35s var(--ease), border-color .35s var(--ease); }
 
     /* Hero */
     .hero {
@@ -597,9 +657,6 @@
   <header class="nav-shell">
     <nav class="nav container" aria-label="Primary navigation">
       <a class="brand" href="#top" aria-label="Harsh Gupta home"><span class="brand-mark">HG</span><span>Harsh Gupta</span></a>
-      <button class="menu-button" type="button" aria-label="Open navigation" aria-expanded="false">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
-      </button>
       <div class="nav-links">
         <a href="#about">About</a>
         <a href="#projects">Projects</a>
@@ -607,6 +664,15 @@
         <a href="#leadership">Leadership</a>
         <a href="Harsh_Gupta_Resume.pdf" target="_blank" rel="noopener">Résumé</a>
         <a class="nav-cta" href="mailto:code.harshgupta@gmail.com">Let’s connect</a>
+      </div>
+      <div class="nav-controls">
+        <button class="theme-toggle" type="button" aria-label="Switch to dark theme" aria-pressed="false" title="Switch to dark theme">
+          <svg class="moon-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8Z"/></svg>
+          <svg class="sun-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.42 1.42M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.42-1.42M17.66 6.34l1.41-1.41"/></svg>
+        </button>
+        <button class="menu-button" type="button" aria-label="Open navigation" aria-expanded="false">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+        </button>
       </div>
     </nav>
   </header>
@@ -920,6 +986,26 @@
   <script>
     const reducePageMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     let pageMotionStarted = false;
+
+    const themeToggle = document.querySelector('.theme-toggle');
+    const themeColorMeta = document.querySelector('meta[name="theme-color"]');
+    function syncThemeControl() {
+      const isDark = document.documentElement.dataset.theme === 'dark';
+      const label = isDark ? 'Switch to light theme' : 'Switch to dark theme';
+      themeToggle?.setAttribute('aria-label', label);
+      themeToggle?.setAttribute('title', label);
+      themeToggle?.setAttribute('aria-pressed', String(isDark));
+      themeColorMeta?.setAttribute('content', isDark ? '#0b0b0b' : '#fbfaf7');
+    }
+    syncThemeControl();
+    window.requestAnimationFrame(() => document.documentElement.classList.add('theme-ready'));
+    themeToggle?.addEventListener('click', () => {
+      const nextTheme = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+      document.documentElement.dataset.theme = nextTheme;
+      document.documentElement.style.colorScheme = nextTheme;
+      try { localStorage.setItem('portfolioTheme', nextTheme); } catch (error) {}
+      syncThemeControl();
+    });
 
     function formatCounterValue(counter, value) {
       const decimals = Number(counter.dataset.decimals || 0);
